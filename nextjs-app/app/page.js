@@ -5,7 +5,7 @@ import styles from "./page.module.css";
 
 // Define your repository's base path as a constant.
 // This is the manual workaround.
-const REPO_BASE_PATH = '/GTMProjects';
+const REPO_BASE_PATH = '/gtmprojects';
 
 export default function Home() {
   return (

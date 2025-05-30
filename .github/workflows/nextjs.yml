@@ -52,7 +52,7 @@ jobs:
           elif [ -f "${{ github.workspace }}/nextjs-app/package.json" ]; then
             echo "manager=npm" >> $GITHUB_OUTPUT
             echo "command=ci" >> $GITHUB_OUTPUT
-            echo "runner=npx --no-install" >> $GITHUB_OUTPUT # This is the line that might have the issue
+            echo "runner=npx --no-install" >> $GITHUB_OUTPUT
             exit 0
           else
             echo "Unable to determine package manager in nextjs-app/"

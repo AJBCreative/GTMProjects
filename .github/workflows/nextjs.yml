@@ -32,27 +32,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Removed the 'cd NextJS' step here.
-      # Instead, we'll use 'working-directory' for relevant steps.
-
       - name: Detect package manager
         id: detect-package-manager
-        # Specify the working directory for this script
-        # This tells the script to look for yarn.lock/package.json inside NextJS/
-        working-directory: NextJS
         run: |
-          if [ -f "yarn.lock" ]; then
+          # Check for lock files relative to the GITHUB_WORKSPACE (repo root)
+          if [ -f "${{ github.workspace }}/nextjs-app/yarn.lock" ]; then # CHANGED FROM NextJS
             echo "manager=yarn" >> $GITHUB_OUTPUT
             echo "command=install" >> $GITHUB_OUTPUT
             echo "runner=yarn" >> $GITHUB_OUTPUT
             exit 0
-          elif [ -f "package.json" ]; then
+          elif [ -f "${{ github.workspace }}/nextjs-app/package.json" ]; then # CHANGED FROM NextJS
+            # If package.json exists but no yarn.lock, assume npm
             echo "manager=npm" >> $GITHUB_OUTPUT
             echo "command=ci" >> $GITHUB_OUTPUT
             echo "runner=npx --no-install" >> $GITHUB_OUTPUT
             exit 0
           else
-            echo "Unable to determine package manager"
+            echo "Unable to determine package manager in nextjs-app/" # CHANGED FROM NextJS
             exit 1
           fi
       - name: Setup Node
@@ -61,35 +57,35 @@ jobs:
           node-version: "20"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
           # Path for caching dependencies should be relative to the repo root
-          cache-dependency-path: NextJS/package-lock.json # Or NextJS/yarn.lock if using yarn
+          cache-dependency-path: nextjs-app/package-lock.json # CHANGED FROM NextJS (or nextjs-app/yarn.lock if using yarn)
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
           static_site_generator: next
-          # This is correct: Tells 'configure-pages' where the Next.js project is
-          directory: NextJS
+          # Tell 'configure-pages' where the Next.js project is
+          directory: nextjs-app # CHANGED FROM NextJS
       - name: Restore cache
         uses: actions/cache@v4
         with:
           # Paths should be relative to the repo root
           path: |
-            NextJS/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('NextJS/package-lock.json', 'NextJS/yarn.lock') }}-${{ hashFiles('NextJS/**.[jt]s', 'NextJS/**.[jt]sx') }}
+            nextjs-app/.next/cache # CHANGED FROM NextJS
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('nextjs-app/package-lock.json', 'nextjs-app/yarn.lock') }}-${{ hashFiles('nextjs-app/**.[jt]s', 'nextjs-app/**.[jt]sx') }} # CHANGED FROM NextJS
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('NextJS/package-lock.json', 'NextJS/yarn.lock') }}-
+            ${{ runner.os }}-nextjs-${{ hashFiles('nextjs-app/package-lock.json', 'nextjs-app/yarn.lock') }}- # CHANGED FROM NextJS
       - name: Install dependencies
-        # This command runs *inside* the NextJS directory due to 'working-directory'
-        working-directory: NextJS
+        # This command runs *inside* the nextjs-app directory due to 'working-directory'
+        working-directory: nextjs-app # CHANGED FROM NextJS
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Build with Next.js
-        # This command runs *inside* the NextJS directory due to 'working-directory'
-        working-directory: NextJS
+        # This command runs *inside* the nextjs-app directory due to 'working-directory'
+        working-directory: nextjs-app # CHANGED FROM NextJS
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # The 'out' directory is inside NextJS/, so specify the full path from repo root
-          path: ./NextJS/out
+          # The 'out' directory is inside nextjs-app/, so specify the full path from repo root
+          path: ./nextjs-app/out # CHANGED FROM NextJS
 
   # Deployment job (no changes needed here as it operates on the uploaded artifact)
   deploy:

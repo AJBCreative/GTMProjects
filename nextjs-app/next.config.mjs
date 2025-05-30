@@ -10,6 +10,7 @@ const nextConfig = {
   images: {
     unoptimized: true, // Required for static export, as Next.js image optimization needs a server
   },
+  trailingSlash: false,
 };
 
 export default nextConfig;

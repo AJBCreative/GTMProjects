@@ -73,7 +73,7 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
 
       # --- DEBUG STEP ---
-      - name: Debug: Show next.config.mjs content
+      - name: Debug:Show next.config.mjs content
         working-directory: nextjs-app
         run: cat next.config.mjs
       # --- END DEBUG STEP ---

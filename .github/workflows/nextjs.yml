@@ -32,6 +32,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # --- AGGRESSIVE CLEANUP STEPS (NEW / MODIFIED) ---
+      - name: Clean Next.js build artifacts
+        working-directory: nextjs-app
+        run: rm -rf .next out node_modules/.cache # Remove existing build outputs and caches
+
+      - name: Clean npm cache (aggressive)
+        run: npm cache clean --force # Cleans global npm cache, run from repo root
+      # --- END AGGRESSIVE CLEANUP ---
+
       - name: Detect package manager
         id: detect-package-manager
         run: |
@@ -49,35 +58,49 @@ jobs:
             echo "Unable to determine package manager in nextjs-app/"
             exit 1
           fi
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
           cache-dependency-path: nextjs-app/package-lock.json
-      - name: Restore cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            nextjs-app/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('nextjs-app/package-lock.json', 'nextjs-app/yarn.lock') }}-${{ hashFiles('nextjs-app/**.[jt]s', 'nextjs-app/**.[jt]sx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('nextjs-app/package-lock.json', 'nextjs-app/yarn.lock') }}-
+
+      # --- REMOVED: No need for 'Restore cache' step with aggressive cleanup ---
+      # - name: Restore cache
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       nextjs-app/.next/cache
+      #     key: ${{ runner.os }}-nextjs-${{ hashFiles('nextjs-app/package-lock.json', 'nextjs-app/yarn.lock') }}-${{ hashFiles('nextjs-app/**.[jt]s', 'nextjs-app/**.[jt]sx') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-nextjs-${{ hashFiles('nextjs-app/package-lock.json', 'nextjs-app/yarn.lock') }}-
+      # --- END REMOVED ---
+
       - name: Install dependencies
         working-directory: nextjs-app
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+
+      # --- DEBUG STEP (NEW) ---
+      - name: Debug: Show next.config.mjs content
+        working-directory: nextjs-app
+        run: cat next.config.mjs
+      # --- END DEBUG STEP ---
+
       - name: Build with Next.js
         working-directory: nextjs-app
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
-      - name: Create .nojekyll file # NEW STEP: Crucial to prevent Jekyll processing
-        working-directory: nextjs-app/out # Ensure this file is placed in the build output
+
+      - name: Create .nojekyll file
+        working-directory: nextjs-app/out
         run: touch .nojekyll
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./nextjs-app/out
 
-  # Deployment job
+  # Deployment job (no changes)
   deploy:
     environment:
       name: github-pages
@@ -85,8 +108,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      # REQUIRED: This action initializes the GitHub Pages environment
-      # IMPORTANT: Removed 'static_site_generator: next' here
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Deploy to GitHub Pages

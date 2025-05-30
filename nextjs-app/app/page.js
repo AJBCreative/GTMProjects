@@ -1,5 +1,11 @@
+// nextjs-app/app/page.js
+
 import Image from "next/image";
 import styles from "./page.module.css";
+
+// Define your repository's base path as a constant.
+// This is the manual workaround.
+const REPO_BASE_PATH = '/GTMProjects';
 
 export default function Home() {
   return (
@@ -7,7 +13,8 @@ export default function Home() {
       <main className={styles.main}>
         <Image
           className={styles.logo}
-          src="/next.svg"
+          // Manually prefixing the src for images from the public folder
+          src={`${REPO_BASE_PATH}/next.svg`}
           alt="Next.js logo"
           width={180}
           height={38}
@@ -23,13 +30,15 @@ export default function Home() {
         <div className={styles.ctas}>
           <a
             className={styles.primary}
+            // External link, no change needed
             href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
             target="_blank"
             rel="noopener noreferrer"
           >
             <Image
               className={styles.logo}
-              src="/vercel.svg"
+              // Manually prefixing the src
+              src={`${REPO_BASE_PATH}/vercel.svg`}
               alt="Vercel logomark"
               width={20}
               height={20}
@@ -37,6 +46,7 @@ export default function Home() {
             Deploy now
           </a>
           <a
+            // External link, no change needed
             href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
             target="_blank"
             rel="noopener noreferrer"
@@ -48,13 +58,15 @@ export default function Home() {
       </main>
       <footer className={styles.footer}>
         <a
+          // External link, no change needed
           href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
           target="_blank"
           rel="noopener noreferrer"
         >
           <Image
             aria-hidden
-            src="/file.svg"
+            // Manually prefixing the src
+            src={`${REPO_BASE_PATH}/file.svg`}
             alt="File icon"
             width={16}
             height={16}
@@ -62,13 +74,15 @@ export default function Home() {
           Learn
         </a>
         <a
+          // External link, no change needed
           href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
           target="_blank"
           rel="noopener noreferrer"
         >
           <Image
             aria-hidden
-            src="/window.svg"
+            // Manually prefixing the src
+            src={`${REPO_BASE_PATH}/window.svg`}
             alt="Window icon"
             width={16}
             height={16}
@@ -76,13 +90,15 @@ export default function Home() {
           Examples
         </a>
         <a
+          // External link, no change needed
           href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
           target="_blank"
           rel="noopener noreferrer"
         >
           <Image
             aria-hidden
-            src="/globe.svg"
+            // Manually prefixing the src
+            src={`${REPO_BASE_PATH}/globe.svg`}
             alt="Globe icon"
             width={16}
             height={16}

@@ -35,20 +35,18 @@ jobs:
       - name: Detect package manager
         id: detect-package-manager
         run: |
-          # Check for lock files relative to the GITHUB_WORKSPACE (repo root)
-          if [ -f "${{ github.workspace }}/nextjs-app/yarn.lock" ]; then # CHANGED FROM NextJS
+          if [ -f "${{ github.workspace }}/nextjs-app/yarn.lock" ]; then
             echo "manager=yarn" >> $GITHUB_OUTPUT
             echo "command=install" >> $GITHUB_OUTPUT
             echo "runner=yarn" >> $GITHUB_OUTPUT
             exit 0
-          elif [ -f "${{ github.workspace }}/nextjs-app/package.json" ]; then # CHANGED FROM NextJS
-            # If package.json exists but no yarn.lock, assume npm
+          elif [ -f "${{ github.workspace }}/nextjs-app/package.json" ]; then
             echo "manager=npm" >> $GITHUB_OUTPUT
             echo "command=ci" >> $GITHUB_OUTPUT
             echo "runner=npx --no-install" >> $GITHUB_OUTPUT
             exit 0
           else
-            echo "Unable to determine package manager in nextjs-app/" # CHANGED FROM NextJS
+            echo "Unable to determine package manager in nextjs-app/"
             exit 1
           fi
       - name: Setup Node
@@ -56,45 +54,41 @@ jobs:
         with:
           node-version: "20"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
-          # Path for caching dependencies should be relative to the repo root
-          cache-dependency-path: nextjs-app/package-lock.json # CHANGED FROM NextJS (or nextjs-app/yarn.lock if using yarn)
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-        with:
-          static_site_generator: next
-          # Tell 'configure-pages' where the Next.js project is
-          directory: nextjs-app # CHANGED FROM NextJS
+          cache-dependency-path: nextjs-app/package-lock.json
       - name: Restore cache
         uses: actions/cache@v4
         with:
-          # Paths should be relative to the repo root
           path: |
-            nextjs-app/.next/cache # CHANGED FROM NextJS
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('nextjs-app/package-lock.json', 'nextjs-app/yarn.lock') }}-${{ hashFiles('nextjs-app/**.[jt]s', 'nextjs-app/**.[jt]sx') }} # CHANGED FROM NextJS
+            nextjs-app/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('nextjs-app/package-lock.json', 'nextjs-app/yarn.lock') }}-${{ hashFiles('nextjs-app/**.[jt]s', 'nextjs-app/**.[jt]sx') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('nextjs-app/package-lock.json', 'nextjs-app/yarn.lock') }}- # CHANGED FROM NextJS
+            ${{ runner.os }}-nextjs-${{ hashFiles('nextjs-app/package-lock.json', 'nextjs-app/yarn.lock') }}-
       - name: Install dependencies
-        # This command runs *inside* the nextjs-app directory due to 'working-directory'
-        working-directory: nextjs-app # CHANGED FROM NextJS
+        working-directory: nextjs-app
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Build with Next.js
-        # This command runs *inside* the nextjs-app directory due to 'working-directory'
-        working-directory: nextjs-app # CHANGED FROM NextJS
+        working-directory: nextjs-app
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
+      - name: Create .nojekyll file # NEW STEP: Crucial to prevent Jekyll processing
+        working-directory: nextjs-app/out # Ensure this file is placed in the build output
+        run: touch .nojekyll
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # The 'out' directory is inside nextjs-app/, so specify the full path from repo root
-          path: ./nextjs-app/out # CHANGED FROM NextJS
+          path: ./nextjs-app/out
 
-  # Deployment job (no changes needed here as it operates on the uploaded artifact)
+  # Deployment job
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
     steps:
+      # REQUIRED: This action initializes the GitHub Pages environment
+      # IMPORTANT: Removed 'static_site_generator: next' here
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
